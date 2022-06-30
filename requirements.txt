@@ -1,3 +1,4 @@
+-f https://download.pytorch.org/whl/lts/1.8/torch_lts.html
 absl-py==1.1.0
 asttokens==2.0.5
 backcall==0.2.0
