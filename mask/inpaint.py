@@ -1,4 +1,5 @@
 from functools import partial
+from typing import Tuple
 
 import numpy as np
 import torch
@@ -9,17 +10,22 @@ from lib.mae.models_mae import MaskedAutoencoderViT
 
 class Inpainter():
     def __init__(self, checkpoints_path: str):
-        model = MaskedAutoencoder(
-            patch_size=16, embed_dim=1024, depth=24, num_heads=16,
-            decoder_embed_dim=512, decoder_depth=8, decoder_num_heads=16,
-            mlp_ratio=4, norm_layer=partial(nn.LayerNorm, eps=1e-6))
-
+        model = MaskedAutoencoder(patch_size=16, embed_dim=1024, depth=24, num_heads=16,
+                                  decoder_embed_dim=512, decoder_depth=8, decoder_num_heads=16,
+                                  mlp_ratio=4, norm_layer=partial(nn.LayerNorm, eps=1e-6))
         checkpoint = torch.load(checkpoints_path, map_location='cpu')
         model.load_state_dict(checkpoint["model"], strict=True)
         self.model = model.cuda()
 
-    # mask_pos: [2,2]
     def __call__(self, x: np.ndarray, mask_pos: np.ndarray) -> np.ndarray:
+        """ Execute inpainting
+        Args:
+            x (np.ndarray): a target image
+            mask_pos (np.ndarray): positions of bboxes (size: [2,2])
+
+        Returns:
+            np.ndarray: inpainted image
+        """
         # prepare input
         self.model.eval()
         self.model.set_mask_position(mask_pos)
@@ -38,9 +44,6 @@ class Inpainter():
 
 
 class MaskedAutoencoder(MaskedAutoencoderViT):
-    """ Masked Autoencoder with VisionTransformer backbone
-    """
-
     def __init__(self, img_size=224, patch_size=16, in_chans=3,
                  embed_dim=1024, depth=24, num_heads=16,
                  decoder_embed_dim=512, decoder_depth=8, decoder_num_heads=16,
@@ -65,7 +68,7 @@ class MaskedAutoencoder(MaskedAutoencoderViT):
     def set_mask_position(self, pos: np.ndarray):
         self.pos = pos
 
-    def make_noise(self, shape, device):
+    def make_noise(self, shape: Tuple[int, int, int], device: torch.device):
         N, L, _ = shape
         p = self.patch_size
         x1, y1 = self.pos[0, :]
@@ -85,7 +88,7 @@ class MaskedAutoencoder(MaskedAutoencoderViT):
         return noise.to(device), ids
 
     def random_masking(self, x: torch.Tensor, mask_ratio: float):
-        N, L, D = x.shape  # batch, length, dim
+        N, L, D = x.shape
         assert N == 1, "Only support batch size 1"
 
         # noise in [0, 1]: 1 is masked

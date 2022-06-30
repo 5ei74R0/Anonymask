@@ -25,7 +25,7 @@ def main():
         assert False, "Unknown mode"
 
 
-def test_mae(args):
+def test_mae(args: argparse.Namespace):
     inpainter = Inpainter(args.mae_checkpoint)
     x = cv.imread("/home/initial/Downloads/download.png")
     x = resize(x, (224, 224))
