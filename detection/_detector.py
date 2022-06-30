@@ -4,8 +4,10 @@ from lib.yolo.utils.general import non_max_suppression
 
 
 class Detector:
-    def __init__(self, device):
-        self.model = Yolov5Model(device=device)
+    def __init__(self, weights: str = "yolov5s.pt", device=None):
+        self.model = Yolov5Model(
+            weights, device=device if device is not None else torch.device("cpu")
+        )
 
     def get_bboxes(
         self, img: torch.Tensor, conf_thres: float = 0.25, iou_thres: float = 0.45
