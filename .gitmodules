@@ -1,6 +1,6 @@
-[submodule "yolo"]
-	path = yolo
+[submodule "lib/yolo"]
+	path = lib/yolo
 	url = git@github.com:ultralytics/yolov5.git
-[submodule "mae"]
-	path = mae
+[submodule "lib/mae"]
+	path = lib/mae
 	url = git@github.com:facebookresearch/mae.git
