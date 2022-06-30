@@ -15,4 +15,4 @@ class Detector:
         preds = non_max_suppression(preds, conf_thres, iou_thres)
         for i, pred in enumerate(preds):
             preds[i] = pred[..., :4].long()
-        return preds
+        return torch.stack(preds)
