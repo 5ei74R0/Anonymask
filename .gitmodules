@@ -1,0 +1,6 @@
+[submodule "yolo"]
+	path = yolo
+	url = git@github.com:ultralytics/yolov5.git
+[submodule "mae"]
+	path = mae
+	url = git@github.com:facebookresearch/mae.git
