@@ -9,6 +9,7 @@ from cv2 import resize
 from detection import Detector
 from mask.inpaint import Inpainter
 from mask.super_resolution import Upsampler
+from mask.utils import gaussian_filter
 
 
 def anonymask(args: argparse.Namespace):
@@ -18,11 +19,12 @@ def anonymask(args: argparse.Namespace):
     torch.random.manual_seed(SEED)
     np.random.seed(SEED)
     device = torch.device(args.device)
+    img = cv.imread(args.test_img_path)
+    H, W = img.shape[:2]
 
     # yolo detector
     print("Detecting...")
     det = Detector(args.yolo_checkpoint, device=device)
-    img = cv.imread(args.test_img_path)
     img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
     x = cv.resize(img, (640, 640))
     input_imgs: torch.Tensor = (
@@ -36,28 +38,41 @@ def anonymask(args: argparse.Namespace):
     if bboxes.sum() == 0:
         print("No bboxes")
         return
-    bboxes = bboxes[0, :, :].float() * scale
-    bboxes = bboxes.view(2, 2).detach().cpu().numpy()
-    bboxes = bboxes.astype(np.int32)[:, ::-1]
+    bboxes = bboxes[0, :, :]
+    bboxes_224 = bboxes.float() * scale
+    bboxes_224 = bboxes_224.view(2, 2).detach().cpu().numpy()
+    bboxes_224 = bboxes_224.astype(np.int32)[:, ::-1]
 
     # execute inpainter
     print("Execute inpainter...")
     inpainter = Inpainter(args.mae_checkpoint, device=device)
     x = resize(img, (224, 224))
     x = x.astype(np.float32) / 255.
-    y = inpainter(x, bboxes)
+    y = inpainter(x, bboxes_224)
+
+    # apply Gaussian filter
+    print("Apply Gaussian filter...")
+    y = gaussian_filter(y)
 
     # apply super resolution
     print("Apply super resolution...")
-    upsampler = Upsampler(sr_scale=4)
-    y = upsampler.upsample(y)
-    y = cv.resize(y, (640, 640))
+    upsampler = Upsampler(args.swinir_checkpoint, sr_scale=4)
+    z = upsampler.upsample(y)  # upsample
+    z = cv.resize(z, (W, H))  # downsample
+
+    # reconstruct image
+    print("Reconstruct image...")
+    bboxes = bboxes.flatten().detach().cpu().numpy()
+    bboxes[::2] = (bboxes[::2] * W / 640.).astype(np.int32)
+    bboxes[1::2] = (bboxes[1::2] * H / 640.).astype(np.int32)
+    y1, x1, y2, x2 = list(bboxes)
+    img[x1:x2, y1:y2, :] = z[x1:x2, y1:y2, :] * 255
 
     # output
-    print("complete!")
-    x = cv.cvtColor(x, cv.COLOR_RGB2BGR)
-    y = cv.cvtColor(y, cv.COLOR_RGB2BGR)
-    cv.imshow("img", y)
+    print("Complete!")
+    img = cv.cvtColor(img, cv.COLOR_RGB2BGR)
+    cv.imshow("img", img)
+    cv.imwrite("../prod.png", img)
     cv.waitKey(10 * 1000)
 
 
@@ -66,6 +81,7 @@ def main():
     parser.add_argument("--mode", default="train")
     parser.add_argument("--yolo_checkpoint", default="checkpoints/yolo_checkpoint.pt")
     parser.add_argument('--mae_checkpoint', default="checkpoints/mae_checkpoint.pt")
+    parser.add_argument('--swinir_checkpoint', default="checkpoints/swinir_checkpoint.pt")
     parser.add_argument("--test_img_path", default="data/openlogo/test/images/logos32plus_000626.jpg")
     parser.add_argument("--device", default="cuda:0")
 

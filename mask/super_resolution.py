@@ -4,7 +4,7 @@ from lib.swinir.models.network_swinir import SwinIR
 
 
 class Upsampler:
-    def __init__(self, sr_scale: int = 4) -> None:
+    def __init__(self, weights: str, sr_scale: int = 4) -> None:
         self.model = SwinIR(
             upscale=sr_scale,
             in_chans=3,
@@ -18,9 +18,7 @@ class Upsampler:
             upsampler="nearest+conv",
             resi_connection="1conv",
         )
-        pretrained_model = torch.load(
-            "checkpoints/003_realSR_BSRGAN_DFO_s64w8_SwinIR-M_x4_GAN.pth"
-        )
+        pretrained_model = torch.load(weights)
         self.model.load_state_dict(
             pretrained_model["params_ema"]
             if "params_ema" in pretrained_model.keys()
