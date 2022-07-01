@@ -19,7 +19,7 @@ def anonymask(args: argparse.Namespace):
     torch.random.manual_seed(SEED)
     np.random.seed(SEED)
     device = torch.device(args.device)
-    img = cv.imread(args.test_img_path)
+    img = cv.imread(args.img_path)
     H, W = img.shape[:2]
 
     # yolo detector
@@ -82,7 +82,7 @@ def main():
     parser.add_argument("--yolo_checkpoint", default="checkpoints/yolo_checkpoint.pt")
     parser.add_argument('--mae_checkpoint', default="checkpoints/mae_checkpoint.pt")
     parser.add_argument('--swinir_checkpoint', default="checkpoints/swinir_checkpoint.pt")
-    parser.add_argument("--test_img_path", default="data/openlogo/test/images/logos32plus_000626.jpg")
+    parser.add_argument("--img_path", default="data/openlogo/test/images/logos32plus_000626.jpg")
     parser.add_argument("--device", default="cuda:0")
 
     args = parser.parse_args()
