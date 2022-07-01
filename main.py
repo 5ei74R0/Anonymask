@@ -13,7 +13,7 @@ def main():
     parser.add_argument("--mode", default="train")
     parser.add_argument("--yolo_checkpoint", default="checkpoints/yolo_checkpoint.pth")
     parser.add_argument('--mae_checkpoint', default="checkpoints/mae_checkpoint.pth")
-    parser.add_argument("--test_img_path", default="data/openlogo/test/images/zara9.jpg")
+    parser.add_argument("--test_img_path", default="data/openlogo/test/images/zara2.jpg")
 
     args = parser.parse_args()
 
@@ -71,6 +71,9 @@ def test_integrate(args: argparse.Namespace):
 
     scale = 224. / 640.
     bboxes = det.get_bboxes(input_imgs)
+    if bboxes.sum() == 0:
+        print("No bboxes")
+        return
     bboxes = bboxes[0, :, :].float() * scale
     bboxes = bboxes.view(2, 2).detach().cpu().numpy()
     bboxes = bboxes.astype(np.int32)[:, ::-1]
