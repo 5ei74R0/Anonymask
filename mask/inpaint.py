@@ -9,13 +9,13 @@ from lib.mae.models_mae import MaskedAutoencoderViT
 
 
 class Inpainter():
-    def __init__(self, checkpoints_path: str):
+    def __init__(self, checkpoints_path: str, device: torch.device = torch.device("cuda:0")):
         model = MaskedAutoencoder(patch_size=16, embed_dim=1024, depth=24, num_heads=16,
                                   decoder_embed_dim=512, decoder_depth=8, decoder_num_heads=16,
                                   mlp_ratio=4, norm_layer=partial(nn.LayerNorm, eps=1e-6))
         checkpoint = torch.load(checkpoints_path, map_location='cpu')
         model.load_state_dict(checkpoint["model"], strict=True)
-        self.model = model.cuda()
+        self.model = model.to(device)
 
     def __call__(self, x: np.ndarray, mask_pos: np.ndarray) -> np.ndarray:
         """ Execute inpainting
