@@ -20,7 +20,7 @@ def anonymask(args: argparse.Namespace):
     # yolo detector
     print("Detecting...")
     det = Detector(args.yolo_checkpoint, device=device)
-    img = cv.imread(args.test_img_path)
+    img = cv.imread(args.img_path)
     img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
     x = cv.resize(img, (640, 640))
     input_imgs: torch.Tensor = (
@@ -58,7 +58,7 @@ def main():
     parser.add_argument("--mode", default="train")
     parser.add_argument("--yolo_checkpoint", default="checkpoints/yolo_checkpoint.pth")
     parser.add_argument('--mae_checkpoint', default="checkpoints/mae_checkpoint.pth")
-    parser.add_argument("--test_img_path", default="data/openlogo/test/images/logos32plus_000626.jpg")
+    parser.add_argument("--img_path", default="data/openlogo/test/images/logos32plus_000626.jpg")
     parser.add_argument("--device", default="cuda:0")
 
     args = parser.parse_args()

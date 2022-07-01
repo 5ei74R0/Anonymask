@@ -11,7 +11,7 @@ from mask.inpaint import Inpainter
 def test_yolo(args: argparse.Namespace):
     DEVICE = torch.device("cuda:0")
     det: Detector = Detector(args.yolo_checkpoint, device=DEVICE)
-    img = cv.imread(args.test_img_path)
+    img = cv.imread(args.img_path)
     img = cv.resize(img, (640, 640))
     input_imgs: torch.Tensor = (
         torch.tensor(img).permute(2, 0, 1).unsqueeze(0).expand(3, -1, -1, -1).to(DEVICE)
@@ -23,7 +23,7 @@ def test_yolo(args: argparse.Namespace):
 
 def test_mae(args: argparse.Namespace):
     inpainter = Inpainter(args.mae_checkpoint)
-    x = cv.imread(args.test_img_path)
+    x = cv.imread(args.img_path)
     x = resize(x, (224, 224))
     x = x.astype(np.float32) / 255.
     y = inpainter(cv.cvtColor(x, cv.COLOR_BGR2RGB), np.array([[0, 0], [40, 40]]))
@@ -39,7 +39,7 @@ def test_integrate(args: argparse.Namespace, save=True):
     np.random.seed(SEED)
     DEVICE = torch.device("cuda:0")
     det: Detector = Detector(args.yolo_checkpoint, device=DEVICE)
-    img = cv.imread(args.test_img_path)
+    img = cv.imread(args.img_path)
     x = cv.resize(img, (640, 640))
     input_imgs: torch.Tensor = (
         torch.tensor(x).permute(2, 0, 1).unsqueeze(0).to(DEVICE)
