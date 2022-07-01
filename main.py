@@ -7,9 +7,9 @@ import torch
 from cv2 import resize
 
 from detection import Detector
-from mask.inpaint import Inpainter
-from mask.super_resolution import Upsampler
-from mask.utils import gaussian_filter
+from improcess.inpaint import Inpainter
+from improcess.super_resolution import Upsampler
+from improcess.utils import gaussian_filter
 
 
 def anonymask(args: argparse.Namespace):

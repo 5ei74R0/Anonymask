@@ -6,8 +6,8 @@ import torch
 from cv2 import resize
 
 from detection import Detector
-from mask.inpaint import Inpainter
-from mask.super_resolution import Upsampler
+from improcess.inpaint import Inpainter
+from improcess.super_resolution import Upsampler
 
 
 def test_yolo(args: argparse.Namespace):
