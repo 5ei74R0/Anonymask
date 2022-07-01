@@ -1,5 +1,10 @@
 openlogo=$1
 
+mkdir -p $openlogo/train/images
+mkdir -p $openlogo/train/labels
+mkdir -p $openlogo/test/images
+mkdir -p $openlogo/test/labels
+
 while read r; do
     cp $openlogo/labels/$r.txt $openlogo/train/labels
     cp $openlogo/JPEGImages/$r.jpg $openlogo/train/images

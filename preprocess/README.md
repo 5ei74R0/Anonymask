@@ -7,7 +7,7 @@ mkdir ../data/openlogo/labels
 ./xmlAnnotations2txtlabels.sh ../data/openlogo/Annotations ../data/openlogo/labels
 ```
 ```sh
-./device.sh ../data/openlogo
+./divide.sh ../data/openlogo
 ```
 
 ## Train yolov5
