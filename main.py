@@ -8,7 +8,6 @@ from detection import Detector
 from mask.inpaint import Inpainter
 
 
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", default="train")
@@ -30,7 +29,6 @@ def main():
         assert False, "Unknown mode"
 
 
-
 def test_yolo(args: argparse.Namespace):
     DEVICE = torch.device("cuda:0")
     det: Detector = Detector(args.yolo_checkpoint, device=DEVICE)
@@ -43,6 +41,7 @@ def test_yolo(args: argparse.Namespace):
     print(input_imgs.shape)
     print(det.get_bboxes(input_imgs))
 
+
 def test_mae(args: argparse.Namespace):
     inpainter = Inpainter(args.mae_checkpoint)
     x = cv.imread("/home/initial/Downloads/download.png")
@@ -52,7 +51,6 @@ def test_mae(args: argparse.Namespace):
     y = cv.cvtColor(y, cv.COLOR_RGB2BGR)
     cv.imshow("img", np.hstack([x, y]))
     cv.waitKey(0)
-
 
 
 if __name__ == "__main__":
