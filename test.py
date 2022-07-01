@@ -1,11 +1,13 @@
-import torch
 import argparse
+
 import cv2 as cv
 import numpy as np
+import torch
 from cv2 import resize
 
 from detection import Detector
 from mask.inpaint import Inpainter
+from mask.super_resolution import Upsampler
 
 
 def test_yolo(args: argparse.Namespace):
@@ -19,6 +21,17 @@ def test_yolo(args: argparse.Namespace):
     )
     print(input_imgs.shape)
     print(det.get_bboxes(input_imgs))
+
+
+def test_swinir(args: argparse.Namespace):
+    DEVICE = torch.device("cuda:0")
+    upsampler = Upsampler(sr_scale=4)
+    img = cv.imread(args.test_img_path)
+    input_imgs: torch.Tensor = (
+        torch.tensor(img).permute(2, 0, 1).unsqueeze(0).expand(3, -1, -1, -1).to(DEVICE)
+        / 255.0
+    )
+    upsampler.upsample(img)
 
 
 def test_mae(args: argparse.Namespace):

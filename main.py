@@ -1,12 +1,14 @@
-import torch
 import argparse
+from test import test_integrate, test_mae, test_swinir, test_yolo
+
 import cv2 as cv
 import numpy as np
+import torch
 from cv2 import resize
 
 from detection import Detector
 from mask.inpaint import Inpainter
-from test import test_mae, test_yolo, test_integrate
+from mask.super_resolution import Upsampler
 
 
 def anonymask(args: argparse.Namespace):
@@ -45,19 +47,25 @@ def anonymask(args: argparse.Namespace):
     x = x.astype(np.float32) / 255.
     y = inpainter(x, bboxes)
 
+    # apply super resolution
+    print("Apply super resolution...")
+    upsampler = Upsampler(sr_scale=4)
+    y = upsampler.upsample(y)
+    y = cv.resize(y, (640, 640))
+
     # output
     print("complete!")
     x = cv.cvtColor(x, cv.COLOR_RGB2BGR)
     y = cv.cvtColor(y, cv.COLOR_RGB2BGR)
-    cv.imshow("img", np.hstack([x, y]))
+    cv.imshow("img", y)
     cv.waitKey(10 * 1000)
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", default="train")
-    parser.add_argument("--yolo_checkpoint", default="checkpoints/yolo_checkpoint.pth")
-    parser.add_argument('--mae_checkpoint', default="checkpoints/mae_checkpoint.pth")
+    parser.add_argument("--yolo_checkpoint", default="checkpoints/yolo_checkpoint.pt")
+    parser.add_argument('--mae_checkpoint', default="checkpoints/mae_checkpoint.pt")
     parser.add_argument("--test_img_path", default="data/openlogo/test/images/logos32plus_000626.jpg")
     parser.add_argument("--device", default="cuda:0")
 
@@ -67,6 +75,8 @@ def main():
         pass
     elif args.mode == "test_mae":
         test_mae(args)
+    elif args.mode == "test_swinir":
+        test_swinir(args)
     elif args.mode == "test_yolo":
         test_yolo(args)
     elif args.mode == "test_integrate":
