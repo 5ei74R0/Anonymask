@@ -1,8 +1,10 @@
 Annotations=$1
 dist=$2
 
+i=0
 for xml in $Annotations/*;
 do
+	echo "#$i"
 	chmod 744 $xml
 	width=$(cat $xml | grep width | sed -e 's/^.*>\(.*\)<\/.*$/\1/g')
 	height=$(cat $xml | grep height | sed -e 's/^.*>\(.*\)<\/.*$/\1/g')
@@ -30,5 +32,7 @@ do
 		# echo $h
 		echo "0 $x $y $w $h" >> $distfile
 	done < ./xxyy
+	i=$((i+1))
+	echo "-> done"
 done
 rm ./tmpx1 ./tmpx2 ./tmpy1 ./tmpy2 ./xxyy
