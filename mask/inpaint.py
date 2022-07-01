@@ -80,7 +80,7 @@ class MaskedAutoencoder(MaskedAutoencoderViT):
         for x in range(x1, x2 + 1):
             for y in range(y1, y2 + 1):
                 n, m = x // p, y // p
-                z = W * n + ((m + 1) % H + 1)
+                z = W * n + m
                 noise[0, z] = 1
                 ids["mask"].add(z)
 
