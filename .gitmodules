@@ -4,3 +4,6 @@
 [submodule "lib/mae"]
 	path = lib/mae
 	url = git@github.com:facebookresearch/mae.git
+[submodule "lib/swinir"]
+	path = lib/swinir
+	url = git@github.com:JingyunLiang/SwinIR.git
