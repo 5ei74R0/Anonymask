@@ -44,7 +44,7 @@ def test_yolo(args: argparse.Namespace):
 
 def test_mae(args: argparse.Namespace):
     inpainter = Inpainter(args.mae_checkpoint)
-    x = cv.imread("/home/initial/Downloads/download.png")
+    x = cv.imread(args.test_img_path)
     x = resize(x, (224, 224))
     x = x.astype(np.float32) / 255.
     y = inpainter(cv.cvtColor(x, cv.COLOR_BGR2RGB), np.array([[0, 0], [40, 40]]))
