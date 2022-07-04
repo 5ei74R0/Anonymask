@@ -4,7 +4,8 @@ Banish any LOGO from your sight 👀
 
 ## Demo
 
-Coming soon...
+![Screenshot from 2022-07-04 22-54-57](https://user-images.githubusercontent.com/51681991/177169271-b0ac2c5b-3ea5-482d-a027-018e817ccf2d.png)
+
 
 ## Getting Started
 
