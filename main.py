@@ -53,12 +53,14 @@ def anonymask(args: argparse.Namespace):
     # apply Gaussian filter
     print("Apply Gaussian filter...")
     y = gaussian_filter(y)
+        y = correct_img(y)
 
     # apply super resolution
     print("Apply super resolution...")
     upsampler = Upsampler(args.swinir_checkpoint, sr_scale=4)
     z = upsampler.upsample(y)  # upsample
     z = cv.resize(z, (W, H))  # downsample
+        z = correct_img(z)
 
     # reconstruct image
     print("Reconstruct image...")
