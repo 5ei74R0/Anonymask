@@ -78,7 +78,7 @@ def anonymask(args: argparse.Namespace):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", default="train")
+    parser.add_argument("--mode", default="prod")
     parser.add_argument("--yolo_checkpoint", default="checkpoints/yolo_checkpoint.pt")
     parser.add_argument('--mae_checkpoint', default="checkpoints/mae_checkpoint.pt")
     parser.add_argument('--swinir_checkpoint', default="checkpoints/swinir_checkpoint.pt")
