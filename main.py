@@ -9,17 +9,27 @@ from cv2 import resize
 from detection import Detector
 from improcess.inpaint import Inpainter
 from improcess.super_resolution import Upsampler
-from improcess.utils import gaussian_filter
+from improcess.utils import gaussian_filter, correct_img
 
 
-def anonymask(args: argparse.Namespace):
+def get_argparser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--mode", default="prod")
+    parser.add_argument("--yolo_checkpoint", default="checkpoints/yolo_checkpoint.pt")
+    parser.add_argument('--mae_checkpoint', default="checkpoints/mae_checkpoint.pt")
+    parser.add_argument('--swinir_checkpoint', default="checkpoints/swinir_checkpoint.pt")
+    parser.add_argument("--img_path", default="data/openlogo/test/images/logos32plus_001262.jpg")
+    parser.add_argument("--device", default="cuda:0")
+    return parser
+
+
+def anonymask(args: argparse.Namespace, img: np.ndarray) -> np.ndarray:
     # init
     SEED = 42
     torch.manual_seed(SEED)
     torch.random.manual_seed(SEED)
     np.random.seed(SEED)
     device = torch.device(args.device)
-    img = cv.imread(args.img_path)
     H, W = img.shape[:2]
 
     # yolo detector
@@ -37,56 +47,52 @@ def anonymask(args: argparse.Namespace):
     bboxes = det.get_bboxes(input_imgs)
     if bboxes.sum() == 0:
         print("No bboxes")
-        return
+        return cv.cvtColor(img, cv.COLOR_RGB2BGR)
+
     bboxes = bboxes[0, :, :]
-    bboxes_224 = bboxes.float() * scale
-    bboxes_224 = bboxes_224.view(2, 2).detach().cpu().numpy()
-    bboxes_224 = bboxes_224.astype(np.int32)[:, ::-1]
+    count = bboxes.shape[0]
+    print(f"> found {count} bboxes !")
+    for i in range(count):
+        print(f"=========== {i+1} / {count} ===========")
+        bbox = bboxes[i, :]
+        bbox_224 = bbox.float() * scale
+        bbox_224 = bbox_224.view(2, 2).detach().cpu().numpy()
+        bbox_224 = bbox_224.astype(np.int32)[:, ::-1]
 
-    # execute inpainter
-    print("Execute inpainter...")
-    inpainter = Inpainter(args.mae_checkpoint, device=device)
-    x = resize(img, (224, 224))
-    x = x.astype(np.float32) / 255.
-    y = inpainter(x, bboxes_224)
+        # execute inpainter
+        print("Execute inpainter...")
+        inpainter = Inpainter(args.mae_checkpoint, device=device)
+        x = resize(img, (224, 224))
+        x = x.astype(np.float32) / 255.
+        y = inpainter(x, bbox_224)
 
-    # apply Gaussian filter
-    print("Apply Gaussian filter...")
-    y = gaussian_filter(y)
+        # apply Gaussian filter
+        print("Apply Gaussian filter...")
+        y = gaussian_filter(y)
         y = correct_img(y)
 
-    # apply super resolution
-    print("Apply super resolution...")
-    upsampler = Upsampler(args.swinir_checkpoint, sr_scale=4)
-    z = upsampler.upsample(y)  # upsample
-    z = cv.resize(z, (W, H))  # downsample
+        # apply super resolution
+        print("Apply super resolution...")
+        upsampler = Upsampler(args.swinir_checkpoint, sr_scale=4)
+        z = upsampler.upsample(y)  # upsample
+        z = cv.resize(z, (W, H))  # downsample
         z = correct_img(z)
 
-    # reconstruct image
-    print("Reconstruct image...")
-    bboxes = bboxes.flatten().detach().cpu().numpy()
-    bboxes[::2] = (bboxes[::2] * W / 640.).astype(np.int32)
-    bboxes[1::2] = (bboxes[1::2] * H / 640.).astype(np.int32)
-    y1, x1, y2, x2 = list(bboxes)
-    img[x1:x2, y1:y2, :] = z[x1:x2, y1:y2, :] * 255
+        # reconstruct image
+        print("Reconstruct image...")
+        bbox = bbox.flatten().detach().cpu().numpy()
+        bbox[::2] = (bbox[::2] * W / 640.).astype(np.int32)
+        bbox[1::2] = (bbox[1::2] * H / 640.).astype(np.int32)
+        y1, x1, y2, x2 = list(bbox)
+        img[x1:x2, y1:y2, :] = z[x1:x2, y1:y2, :] * 255
 
     # output
     print("Complete!")
-    img = cv.cvtColor(img, cv.COLOR_RGB2BGR)
-    cv.imshow("img", img)
-    cv.imwrite("../prod.png", img)
-    cv.waitKey(10 * 1000)
+    return cv.cvtColor(img, cv.COLOR_RGB2BGR)
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", default="prod")
-    parser.add_argument("--yolo_checkpoint", default="checkpoints/yolo_checkpoint.pt")
-    parser.add_argument('--mae_checkpoint', default="checkpoints/mae_checkpoint.pt")
-    parser.add_argument('--swinir_checkpoint', default="checkpoints/swinir_checkpoint.pt")
-    parser.add_argument("--img_path", default="data/openlogo/test/images/logos32plus_000626.jpg")
-    parser.add_argument("--device", default="cuda:0")
-
+    parser = get_argparser()
     args = parser.parse_args()
 
     if args.mode == "train":
@@ -100,7 +106,10 @@ def main():
     elif args.mode == "test_integrate":
         test_integrate(args)
     elif args.mode == "prod":
-        anonymask(args)
+        img = cv.imread(args.img_path)
+        img = anonymask(args, img)
+        cv.imshow("img", img)
+        cv.waitKey(10 * 1000)
     else:
         assert False, "Unknown mode"
 
