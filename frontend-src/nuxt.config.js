@@ -52,6 +52,10 @@ export default {
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
+    publicPath: 'https://otsukotsu.github.io/Anonymask'
+  },
+  router: {
+    base: '/Anonymask/'
   },
   generate: {
     dir: '../docs'
