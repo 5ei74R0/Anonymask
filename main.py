@@ -25,7 +25,7 @@ class Anonymask:
         self.device = device
         self.summary()
 
-    def __call__(self, img: np.ndarray) -> np.ndarray:
+    def __call__(self, img: np.ndarray) -> np.ndarray:  # img should be RGB
         # init
         SEED = 42
         torch.manual_seed(SEED)
@@ -47,7 +47,7 @@ class Anonymask:
         bboxes = self.detector.get_bboxes(input_imgs)
         if bboxes.sum() == 0:
             print("No bboxes")
-            return cv.cvtColor(img, cv.COLOR_RGB2BGR)
+            return img
 
         bboxes = bboxes[0, :, :]
         count = bboxes.shape[0]
@@ -86,7 +86,7 @@ class Anonymask:
 
         # output
         print("Complete!")
-        return cv.cvtColor(img, cv.COLOR_RGB2BGR)
+        return img
 
     def summary(self):
         print("Summary of models:")
@@ -106,7 +106,9 @@ def main():
         pass
     elif args.mode == "prod":
         img = cv.imread(args.img_path)
+        img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
         img = anonymask(img)
+        img = cv.cvtColor(img, cv.COLOR_RGB2BGR)
         cv.imshow("img", img)
         cv.waitKey(10 * 1000)
     elif args.mode == "test_mae":
