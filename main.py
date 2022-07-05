@@ -13,6 +13,7 @@ from improcess.utils import gaussian_filter, correct_img
 from util.data import Checkpoints
 from util.argparse import get_argparser, get_checkpoints
 from test import test_integrate, test_mae, test_swinir, test_yolo
+from util.server import CallbackServer
 
 
 class Anonymask:
@@ -35,7 +36,6 @@ class Anonymask:
 
         # yolo detector
         print("Detecting...")
-        img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
         x = cv.resize(img, (640, 640))
         input_imgs: torch.Tensor = (
             torch.tensor(x).permute(2, 0, 1).unsqueeze(0).to(self.device) / 255.0
@@ -111,6 +111,8 @@ def main():
         img = cv.cvtColor(img, cv.COLOR_RGB2BGR)
         cv.imshow("img", img)
         cv.waitKey(10 * 1000)
+    elif args.mode == "server":
+        CallbackServer.start(callback=anonymask)
     elif args.mode == "test_mae":
         test_mae(args)
     elif args.mode == "test_swinir":
