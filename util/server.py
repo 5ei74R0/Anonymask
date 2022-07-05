@@ -6,7 +6,8 @@ import uvicorn
 import cv2 as cv
 import numpy as np
 
-from fastapi import FastAPI, File, Form, UploadFile
+from fastapi import FastAPI, File, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import StreamingResponse
 from typing import List
 from torchvision import transforms
@@ -40,4 +41,11 @@ class CallbackServer:
 
         host_name = "127.0.0.1"
         port_num = 8080
+        fapi.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
         uvicorn.run(fapi, host=host_name, port=port_num)
