@@ -27,7 +27,7 @@
 import Card from '~/components/Card'
 
 const axios = require('axios');
-const API_URL = ""
+const API_URL = "http://redirect.yuiga.dev/api/anonymask";
 export default {
   name: 'IndexPage',
   components: {
