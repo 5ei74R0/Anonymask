@@ -77,8 +77,8 @@ class MaskedAutoencoder(MaskedAutoencoderViT):
 
         noise = torch.zeros((N, L))
         ids = {k: set() for k in ["mask", "nonmask"]}
-        for x in range(x1, x2 + 1):
-            for y in range(y1, y2 + 1):
+        for x in range(x1, min(self.img_size, x2 + 1)):
+            for y in range(y1, min(self.img_size, y2 + 1)):
                 n, m = x // p, y // p
                 z = W * n + m
                 noise[0, z] = 1
