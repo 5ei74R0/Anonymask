@@ -22,10 +22,11 @@ class Anonymask:
         device = torch.device(device)
         self.detector = Detector(checkpoints.yolo, device=device)
         self.inpainter = Inpainter(checkpoints.mae, device=device)
-        self.upsampler = Upsampler(checkpoints.swinir, sr_scale=4)
+        self.upsampler = Upsampler(checkpoints.swinir, device=device)
         self.device = device
         self.summary()
 
+    @torch.no_grad()
     def __call__(self, img: np.ndarray) -> np.ndarray:  # img should be RGB
         # init
         SEED = 42

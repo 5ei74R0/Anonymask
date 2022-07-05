@@ -13,6 +13,7 @@ class Detector:
         self, img: torch.Tensor, conf_thres: float = 0.25, iou_thres: float = 0.45
     ) -> torch.Tensor:
         """B x C x H x W -> B x #bboxes x 4"""
+        self.model.eval()
         preds = self.model(img)
         preds = non_max_suppression(preds, conf_thres, iou_thres)
         for i, pred in enumerate(preds):
