@@ -17,7 +17,7 @@ Banish any LOGO from your sight 👀
 
 ### Preprocess
 
-1. Download finetuned Yolov5, Masked Auto Encoder, SwinIR models from [[Google Drive](https://drive.google.com/drive/folders/1m-jA_p3aCg7G3MxJ9QH6R9cpS9mVRs9j?usp=sharing)], and put them into `./checkpoints/`.
+1. Download finetuned Yolov5, Masked Auto Encoder, SwinIR models from [[release](https://github.com/5ei74R0/Anonymask/releases/tag/add-models)], and put them into `./checkpoints/`.
 2. Place [openlogo](https://hangsu0730.github.io/qmul-openlogo/) dir into `./data/`
 3. `cd preprocess; mkdir ../data/openlogo/labels`
 4. `./xmlAnnotations2txtlabels.sh ../data/openlogo/Annotations ../data/openlogo/labels`
